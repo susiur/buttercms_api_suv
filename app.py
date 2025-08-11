@@ -28,7 +28,10 @@ app.add_middleware(
     allow_methods=["*"],
 )
 
-client = httpx.AsyncClient(timeout=TIMEOUT, base_url=BUTTER_BASE_URL)
+# Seguir redirecciones (evita 301 por slash final)
+client = httpx.AsyncClient(
+    timeout=TIMEOUT, base_url=BUTTER_BASE_URL, follow_redirects=True
+)
 UPSTREAM_CACHE_HEADERS = {"cache-control", "etag", "last-modified", "expires"}
 
 
@@ -52,7 +55,9 @@ async def _proxy_get(
     path: str, params: Iterable[Tuple[str, str]], response: Response
 ) -> Response:
     qp = _merge_query_params(params)
-    url = f"{BUTTER_V2}/{path.lstrip('/')}"
+    # Normaliza con slash final para evitar 301
+    norm = path.lstrip("/").rstrip("/") + "/"
+    url = f"{BUTTER_V2}/{norm}"
     upstream = await client.get(url, params=qp)
     _copy_cache_headers(upstream.headers, response)
     ctype = upstream.headers.get("content-type", "")
@@ -133,16 +138,16 @@ HTML_BASE_CSS = """
 
 def _html_shell(title: str, body: str) -> str:
     return f"""<!doctype html>
-<html lang="es">
+<html lang=\"es\">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset=\"utf-8\" />
+<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />
 <title>{title}</title>
 {HTML_BASE_CSS}
 </head>
 <body>
-<header><div class="wrap"><strong>Bookly Blog</strong></div></header>
-<main class="wrap">{body}</main>
+<header><div class=\"wrap\"><strong>Bookly Blog</strong></div></header>
+<main class=\"wrap\">{body}</main>
 <footer>© Bookly • servido por FastAPI en EC2</footer>
 </body>
 </html>"""
@@ -160,7 +165,8 @@ async def blog_index(request: Request):
     page_size = request.query_params.get("page_size", "9")
     params = [("page", page), ("page_size", page_size)]
     qp = _merge_query_params(params)
-    r = await client.get(f"{BUTTER_V2}/posts", params=qp)
+    # Asegura slash final para evitar 301
+    r = await client.get(f"{BUTTER_V2}/posts/", params=qp)
     if r.status_code != 200:
         return PlainTextResponse(
             f"Error al cargar posts ({r.status_code})", status_code=r.status_code
@@ -177,11 +183,11 @@ async def blog_index(request: Request):
         summary = p.get("summary") or ""
         published = (p.get("published") or "")[:10]
         cards.append(f"""
-        <div class="card">
-          <h2 class="title"><a href="/blog/{slug}">{title}</a></h2>
-          <div class="meta">Publicado: {published}</div>
-          <p class="desc">{summary}</p>
-          <a class="btn" href="/blog/{slug}">Leer más</a>
+        <div class=\"card\">
+          <h2 class=\"title\"><a href=\"/blog/{slug}\">{title}</a></h2>
+          <div class=\"meta\">Publicado: {published}</div>
+          <p class=\"desc\">{summary}</p>
+          <a class=\"btn\" href=\"/blog/{slug}\">Leer más</a>
         </div>
         """)
     grid = f'<div class="grid">{"".join(cards) or "<p>No hay posts.</p>"}</div>'
@@ -192,10 +198,10 @@ async def blog_index(request: Request):
     prev_q = f"?page={curr - 1}&page_size={page_size}" if previous_page else ""
     next_q = f"?page={curr + 1}&page_size={page_size}" if next_page else ""
     pager = f"""
-    <nav class="pager">
-      <a class="btn" {"disabled" if not previous_page else ""} href="/blog{prev_q}">← Anterior</a>
-      <span style="align-self:center;color:#9fb3c8">Página {curr}</span>
-      <a class="btn" {"disabled" if not next_page else ""} href="/blog{next_q}">Siguiente →</a>
+    <nav class=\"pager\">
+      <a class=\"btn\" {"disabled" if not previous_page else ""} href=\"/blog{prev_q}\">← Anterior</a>
+      <span style=\"align-self:center;color:#9fb3c8\">Página {curr}</span>
+      <a class=\"btn\" {"disabled" if not next_page else ""} href=\"/blog{next_q}\">Siguiente →</a>
     </nav>
     """
     body = grid + pager
@@ -205,7 +211,8 @@ async def blog_index(request: Request):
 @app.get("/blog/{slug}", response_class=HTMLResponse, tags=["html"])
 async def blog_post(slug: str, request: Request):
     qp = _merge_query_params([])
-    r = await client.get(f"{BUTTER_V2}/posts/{slug}", params=qp)
+    # Asegura slash final para evitar 301
+    r = await client.get(f"{BUTTER_V2}/posts/{slug}/", params=qp)
     if r.status_code != 200:
         return PlainTextResponse(
             f"Post no encontrado ({r.status_code})", status_code=r.status_code
@@ -217,9 +224,9 @@ async def blog_post(slug: str, request: Request):
     html = f"""
     <article>
       <h1>{title}</h1>
-      <div class="meta">Publicado: {published}</div>
-      <div class="content">{body_html}</div>
-      <p><a class="btn" href="/blog">← Volver</a></p>
+      <div class=\"meta\">Publicado: {published}</div>
+      <div class=\"content\">{body_html}</div>
+      <p><a class=\"btn\" href=\"/blog\">← Volver</a></p>
     </article>
     """
     return HTMLResponse(_html_shell(f"Bookly • {title}", html))
