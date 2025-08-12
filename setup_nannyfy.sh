@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="bookly"
+APP_NAME="nannyfy"
 APP_DIR="/opt/${APP_NAME}"
 PY_ENV="${APP_DIR}/venv"
 APP_FILE="${APP_DIR}/app.py"
@@ -63,7 +63,7 @@ chmod 600 "${ENV_FILE}"
 # --- Systemd service ---
 cat > "${SERVICE_FILE}" <<EOF
 [Unit]
-Description=Bookly FastAPI (ButterCMS bridge)
+Description=Nannyfy FastAPI (ButterCMS bridge)
 After=network.target
 
 [Service]
@@ -85,7 +85,6 @@ ProtectHome=true
 WantedBy=multi-user.target
 EOF
 
-# --- Si el marcador está en app.py, insertamos el contenido real ---
 if grep -q "REPLACE_APP_PY" "${APP_FILE}"; then
   echo "Actualizando app.py..."
   cat > "${APP_FILE}" <<'PYFALLBACK'
@@ -114,10 +113,12 @@ systemctl restart "${APP_NAME}"
 PUB_IP=$(curl -s http://checkip.amazonaws.com || echo "TU_IP_PUBLICA")
 echo
 echo "========================================"
-echo "Servicio desplegado: ${APP_NAME}"
+echo "🧸 Nannyfy desplegado correctamente!"
+echo "Servicio: ${APP_NAME}"
 echo "Estado: "
 systemctl --no-pager --full status "${APP_NAME}" | sed -n '1,12p' || true
 echo
-echo "Prueba en:  http://${PUB_IP}/blog"
-echo "Healthcheck: http://${PUB_IP}/health"
+echo "🌐 Prueba en:  http://${PUB_IP}/blog"
+echo "❤️ Healthcheck: http://${PUB_IP}/health"
+echo "🏠 Inicio: http://${PUB_IP}/"
 echo "========================================"

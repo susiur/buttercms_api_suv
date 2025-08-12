@@ -1,34 +1,44 @@
-# Guía de uso: ButterCMS y API Bookly (FastAPI)
+# 🧸 Guía de Nannyfy API - ButterCMS Integration
 
-Esta guía explica cómo funciona la API pública de ButterCMS y cómo esta app de FastAPI actúa como puente (proxy) y renderer HTML para tu blog.
+Esta guía explica cómo funciona la API moderna de **Nannyfy** construida con FastAPI, que actúa como puente (proxy) y renderer HTML para nuestro blog de cuidado infantil.
 
-## 1) ButterCMS: conceptos y API
+## 1) 🎯 ButterCMS: Conceptos y API
 
-ButterCMS es un CMS headless con una API REST.
+ButterCMS es nuestro CMS headless con una API REST robusta.
 
-- Base URL: `https://api.buttercms.com`
-- Versión: `v2`
-- Autenticación: querystring `auth_token=<TU_TOKEN>` en cada petición.
-- Respuestas: JSON.
-- Paginación: parámetros `page` (1..n) y `page_size` (por ejemplo 10, 20...). La respuesta incluye `meta.next_page` y `meta.previous_page`.
+- **Base URL**: `https://api.buttercms.com`
+- **Versión**: `v2`
+- **Autenticación**: querystring `auth_token=<TU_TOKEN>` en cada petición
+- **Respuestas**: JSON estructurado
+- **Paginación**: parámetros `page` (1..n) y `page_size` (ej: 10, 20)
 
-Endpoints comunes para blog:
+### Endpoints principales para blog:
 
-- Listado de posts: `GET /v2/posts/`
-  - Parámetros útiles: `page`, `page_size`, `exclude_body=1` (si no quieres el cuerpo), filtros por categorías, etc.
-  - Respuesta: `{ data: [...posts], meta: { next_page, previous_page } }`
-- Detalle de post: `GET /v2/posts/{slug}/`
-  - Respuesta: `{ data: { title, slug, body, published, ... } }`
-- Páginas por tipo: `GET /v2/pages/{page_type}/?slug=...`
+#### Lista de posts
+```
+GET /v2/posts/
+```
+- **Parámetros**: `page`, `page_size`, `exclude_body=1`, filtros por categorías
+- **Respuesta**: `{ data: [...posts], meta: { next_page, previous_page } }`
 
-Observaciones:
+#### Detalle de post
+```
+GET /v2/posts/{slug}/
+```
+- **Respuesta**: `{ data: { title, slug, body, published, ... } }`
 
-- ButterCMS redirige (HTTP 301) cuando falta la barra final `/` en algunos endpoints; usa slash final o sigue redirecciones.
-- Para performance, respeta cabeceras de caché: `Cache-Control`, `ETag`, `Last-Modified`, `Expires`.
+#### Páginas por tipo
+```
+GET /v2/pages/{page_type}/?slug=...
+```
 
-Documentación oficial: https://buttercms.com/docs/api/
+### 🔧 Observaciones técnicas:
 
-## 2) API Bookly (esta app FastAPI)
+- ButterCMS redirige (HTTP 301) cuando falta `/` final; usamos `follow_redirects`
+- Respetamos cabeceras de caché: `Cache-Control`, `ETag`, `Last-Modified`, `Expires`
+- Documentación oficial: https://buttercms.com/docs/api/
+
+## 2) 🚀 API Nannyfy (FastAPI)
 
 Esta API hace dos cosas:
 

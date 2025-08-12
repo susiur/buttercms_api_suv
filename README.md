@@ -1,6 +1,15 @@
-# Bookly ButterCMS Bridge (FastAPI)
+# Nannyfy ButterCMS Bridge (FastAPI)
 
-Pequeño proxy/renderer para ButterCMS con FastAPI. Expone endpoints `/v2/*` compatibles y rutas HTML `/blog` y `/blog/{slug}`.
+Plataforma web moderna para **Nannyfy** - tu servicio de cuidado infantil de confianza. Este proyecto incluye un proxy/renderer para ButterCMS con FastAPI que expone endpoints `/v2/*` compatibles y rutas HTML optimizadas para `/blog` y `/blog/{slug}`.
+
+## ✨ Características
+
+- 🧸 **Diseño moderno y atractivo** con gradientes y animaciones suaves
+- 📱 **Totalmente responsive** - se adapta a todos los dispositivos
+- 🚀 **Rendimiento optimizado** con FastAPI
+- 🔒 **CORS configurado** para integraciones flexibles
+- 📝 **Blog integrado** con ButterCMS
+- 🎨 **UI/UX mejorada** con tipografía Inter y efectos visuales
 
 ## Requisitos locales
 
@@ -49,10 +58,14 @@ El script:
 
 Nota: para HTTPS y mejor flexibilidad, usa Nginx + Let’s Encrypt y deja Uvicorn en 8000.
 
-## Variables de entorno
+## 🔧 Variables de entorno
 
 - `BUTTER_API_TOKEN`: token de ButterCMS. Puedes usar `.env` en el server vía systemd `EnvironmentFile`.
 
-## Licencia
+## 📄 Licencia
 
 MIT
+
+---
+
+**Nannyfy** - Conectando familias con cuidadores de confianza 🧸
